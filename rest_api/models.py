@@ -11,13 +11,13 @@ class Pessoa(models.Model):
         return self.name
 
     def spouses(self):
-        a = [{"pessoa":m.pessoa_dois, "data_inicio": m.data_inicio, "data_final": m.data_final} for m in self.pessoa_um_de.all()]
-        b = [{"pessoa":m.pessoa_um, "data_inicio": m.data_inicio, "data_final": m.data_final} for m in self.pessoa_dois_de.all()]
+        a = [{"pessoa":m.pessoa_dois, "data_inicio": m.data_inicio, "data_final": m.data_final} for m in self.pessoa_um_de.filter(pessoa_um_id = self.id)]
+        b = [{"pessoa":m.pessoa_um, "data_inicio": m.data_inicio, "data_final": m.data_final} for m in self.pessoa_dois_de.filter(pessoa_dois_id = self.id)]
         return a + b
 
     def descendentes(self):
-        a = [{"filhos": m.descendentes()} for m in self.pessoa_um_de.all()]
-        b = [{"filhos": m.descendentes()} for m in self.pessoa_dois_de.all()] 
+        a = [{"filhos": m.descendentes()} for m in self.pessoa_um_de.filter(pessoa_um_id = self.id)]
+        b = [{"filhos": m.descendentes()} for m in self.pessoa_dois_de.filter(pessoa_dois_id = self.id)] 
         if a and b:
             res = a[0]['filhos'] + b[0]["filhos"]
             return {"descendentes": res[0]}
@@ -43,7 +43,7 @@ class Uniao(models.Model):
         return '{} + {}'.format(self.pessoa_um, self.pessoa_dois)
 
     def descendentes(self):
-        a = [m.filhos.all() for m in self.uniao_de.all()]
+        a = [m.filhos.all() for m in self.uniao_de.filter(uniao_id = self.id)]
         return a
 
 
