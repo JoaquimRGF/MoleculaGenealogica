@@ -13,7 +13,7 @@ class PessoaSerializer(serializers.ModelSerializer):
 class UniaoSerializer(serializers.ModelSerializer):
 
     pessoa_um = serializers.PrimaryKeyRelatedField(queryset=Pessoa.objects.all())
-    pessoa_dois = serializers.PrimaryKeyRelatedField(queryset=Pessoa.objects.all())
+    pessoa_dois = serializers.PrimaryKeyRelatedField(queryset=Pessoa.objects.all(), allow_null=True)
 
     class Meta:
         model = Uniao
@@ -28,7 +28,7 @@ class UniaoSerializer(serializers.ModelSerializer):
 class UniaoSerializerList(serializers.ModelSerializer):
 
     pessoa_um = PessoaSerializer()
-    pessoa_dois = PessoaSerializer()
+    pessoa_dois = PessoaSerializer(allow_null=True)
 
     class Meta:
         model = Uniao

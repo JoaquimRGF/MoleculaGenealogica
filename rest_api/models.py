@@ -11,7 +11,7 @@ class Pessoa(models.Model):
         return self.name
 
 class Uniao(models.Model):
-    pessoa_um = models.ForeignKey(Pessoa, on_delete=models.CASCADE, related_name='pessoa_um_de', blank = True, null = True)
+    pessoa_um = models.ForeignKey(Pessoa, on_delete=models.CASCADE, related_name='pessoa_um_de')
     pessoa_dois = models.ForeignKey(Pessoa, on_delete=models.CASCADE, related_name='pessoa_dois_de', blank = True, null = True)
     data_criacao = models.DateTimeField( auto_now_add=True)
     data_modificacao = models.DateTimeField( auto_now=True)
