@@ -25,11 +25,40 @@ class UniaoSerializer(serializers.ModelSerializer):
             'data_final'
         ]
 
+class UniaoSerializerList(serializers.ModelSerializer):
+
+    pessoa_um = PessoaSerializer()
+    pessoa_dois = PessoaSerializer()
+
+    class Meta:
+        model = Uniao
+        fields = [
+            'id',
+            'pessoa_um',
+            'pessoa_dois', 
+            'data_inicio', 
+            'data_final'
+        ]
+
 
 
 class FamiliaSerializer(serializers.ModelSerializer):
     uniao = serializers.PrimaryKeyRelatedField(queryset=Uniao.objects.all())
     filhos = serializers.PrimaryKeyRelatedField(queryset=Pessoa.objects.all(), many=True)
+
+    class Meta:
+        model = Familia
+        fields = [
+            'id',
+            'uniao',
+            'filhos'
+            ]
+
+
+
+class FamiliaSerializerList(serializers.ModelSerializer):
+    uniao = UniaoSerializerList()
+    filhos = PessoaSerializer(many=True)
 
     class Meta:
         model = Familia
