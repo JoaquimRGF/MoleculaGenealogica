@@ -24,7 +24,10 @@ class Pessoa(models.Model):
         else:
             if a:
                 return {"descendentes": a[0]['filhos'][0]}
-            return {"descendentes": b[0]['filhos'][0]}
+            elif b:
+                return {"descendentes": b[0]['filhos'][0]}
+            else:
+                return {"descendentes": []}
 
 
 
