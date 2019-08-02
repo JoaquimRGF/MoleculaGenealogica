@@ -9,5 +9,6 @@ router.register('familia', views.FamiliaView)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('pessoa/<int:pk>/spouses', views.spouses, name = "spouses")
+    path('pessoa/<int:pk>/spouses', views.spouses, name = "spouses"),
+    path('pessoa/<int:pk>/descendentes', views.descendentes, name = "descendentes")
 ]

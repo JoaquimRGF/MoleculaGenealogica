@@ -16,10 +16,13 @@ class PessoaSerializer(serializers.ModelSerializer):
 
 
 class PessoaSpousesSerializer(serializers.Serializer):
-    
     pessoa = PessoaSerializer()
     data_inicio = serializers.DateField()
     data_final = serializers.DateField()
+
+class PessoaDescendentesSerializer(serializers.Serializer):    
+    # pessoa = PessoaSerializer()
+    descendentes = PessoaSerializer(many = True)
 
 
 class UniaoSerializer(serializers.ModelSerializer):

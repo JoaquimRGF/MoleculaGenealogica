@@ -15,6 +15,17 @@ class Pessoa(models.Model):
         b = [{"pessoa":m.pessoa_um, "data_inicio": m.data_inicio, "data_final": m.data_final} for m in self.pessoa_dois_de.all()]
         return a + b
 
+    def descendentes(self):
+        a = [{"filhos": m.descendentes()} for m in self.pessoa_um_de.all()]
+        b = [{"filhos": m.descendentes()} for m in self.pessoa_dois_de.all()] 
+        if a and b:
+            res = a[0]['filhos'] + b[0]["filhos"]
+            return {"descendentes": res[0]}
+        else:
+            if a:
+                return {"descendentes": a[0]['filhos'][0]}
+            return {"descendentes": b[0]['filhos'][0]}
+
 
 
 class Uniao(models.Model):
@@ -28,6 +39,12 @@ class Uniao(models.Model):
     def __str__(self):
         return '{} + {}'.format(self.pessoa_um, self.pessoa_dois)
 
+    def descendentes(self):
+        a = [m.filhos.all() for m in self.uniao_de.all()]
+        return a
+
+
+
 class Familia(models.Model):
     uniao = models.ForeignKey(Uniao, on_delete=models.CASCADE, related_name="uniao_de")
     filhos = models.ManyToManyField(Pessoa)
@@ -36,6 +53,7 @@ class Familia(models.Model):
 
     def __str__(self):
         return '{} --> {}'.format(self.uniao, self.filhos)
+
 
 
 

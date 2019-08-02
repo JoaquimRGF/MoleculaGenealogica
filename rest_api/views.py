@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
 from .models import Pessoa, Uniao, Familia
-from .serializers import PessoaSerializer, UniaoSerializer, UniaoSerializerList, FamiliaSerializer, FamiliaSerializerList, PessoaSpousesSerializer
+from .serializers import PessoaSerializer, UniaoSerializer, UniaoSerializerList, FamiliaSerializer, FamiliaSerializerList, PessoaSpousesSerializer, PessoaDescendentesSerializer
 
 # Create your views here.
 class PessoaView(viewsets.ModelViewSet):
@@ -20,6 +20,19 @@ def spouses(request, pk):
     spouses_serializer = list(map(lambda x: PessoaSpousesSerializer(x).data, queryset))
     print(spouses_serializer)
     return Response(spouses_serializer)
+
+
+@api_view(["GET"])
+def descendentes(request, pk):
+    pessoa = get_object_or_404(Pessoa, id=pk)
+    queryset = pessoa.descendentes()
+    descendentes_serializer = PessoaDescendentesSerializer(queryset).data['descendentes']
+    print(descendentes_serializer)
+    
+    return Response(descendentes_serializer)
+
+
+
 
 
 class UniaoView(viewsets.ModelViewSet):
