@@ -8,5 +8,6 @@ router.register('uniao', views.UniaoView)
 router.register('familia', views.FamiliaView)
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('pessoa/<int:pk>/spouses', views.spouses, name = "spouses")
 ]

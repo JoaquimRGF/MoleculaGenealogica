@@ -1,7 +1,10 @@
 from django.shortcuts import render
 from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from django.shortcuts import get_object_or_404
 from .models import Pessoa, Uniao, Familia
-from .serializers import PessoaSerializer, UniaoSerializer, UniaoSerializerList, FamiliaSerializer, FamiliaSerializerList
+from .serializers import PessoaSerializer, UniaoSerializer, UniaoSerializerList, FamiliaSerializer, FamiliaSerializerList, PessoaSpousesSerializer
 
 # Create your views here.
 class PessoaView(viewsets.ModelViewSet):
@@ -9,6 +12,14 @@ class PessoaView(viewsets.ModelViewSet):
     serializer_class = PessoaSerializer
 
 
+@api_view(["GET"])
+def spouses(request, pk):
+    pessoa = get_object_or_404(Pessoa, id=pk)
+    queryset = pessoa.spouses()
+    print(queryset)
+    spouses_serializer = list(map(lambda x: PessoaSpousesSerializer(x).data, queryset))
+    print(spouses_serializer)
+    return Response(spouses_serializer)
 
 
 class UniaoView(viewsets.ModelViewSet):
@@ -33,3 +44,5 @@ class FamiliaView(viewsets.ModelViewSet):
         if self.action == 'retrieve':
             return FamiliaSerializerList
         return FamiliaSerializer # default for create/destroy/update.
+
+

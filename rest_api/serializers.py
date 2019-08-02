@@ -1,6 +1,10 @@
 from rest_framework import serializers
 from .models import Pessoa, Uniao, Familia
 
+
+
+
+
 class PessoaSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -9,6 +13,14 @@ class PessoaSerializer(serializers.ModelSerializer):
             'id',
             'name'
             ]
+
+
+class PessoaSpousesSerializer(serializers.Serializer):
+    
+    pessoa = PessoaSerializer()
+    data_inicio = serializers.DateField()
+    data_final = serializers.DateField()
+
 
 class UniaoSerializer(serializers.ModelSerializer):
 
