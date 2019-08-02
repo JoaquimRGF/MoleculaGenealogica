@@ -12,22 +12,24 @@ class PessoaSerializer(serializers.ModelSerializer):
 
 class UniaoSerializer(serializers.ModelSerializer):
 
-    pessoa_um = serializers.ReadOnlyField(source='pessoa_um.name')
-    pessoa_dois = serializers.ReadOnlyField(source='pessoa_dois.name')
+    pessoa_um = serializers.PrimaryKeyRelatedField(queryset=Pessoa.objects.all())
+    pessoa_dois = serializers.PrimaryKeyRelatedField(queryset=Pessoa.objects.all())
 
     class Meta:
         model = Uniao
         fields = [
             'id',
             'pessoa_um',
-            'pessoa_dois'
+            'pessoa_dois', 
+            'data_inicio', 
+            'data_final'
         ]
 
 
 
 class FamiliaSerializer(serializers.ModelSerializer):
-    uniao = serializers.ReadOnlyField(source='uniao.__str__')
-    filhos = PessoaSerializer(many=True)
+    uniao = serializers.PrimaryKeyRelatedField(queryset=Uniao.objects.all())
+    filhos = serializers.PrimaryKeyRelatedField(queryset=Pessoa.objects.all(), many=True)
 
     class Meta:
         model = Familia
