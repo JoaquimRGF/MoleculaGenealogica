@@ -1,69 +1,98 @@
 from rest_framework import serializers
-from .models import Pessoa, Uniao, Familia
+from .models import Person, Union, Family
 
-class PessoaSerializer(serializers.ModelSerializer):
+
+class PersonSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Pessoa
+        model = Person
         fields = [
             'id',
             'name'
             ]
 
-class UniaoSerializer(serializers.ModelSerializer):
 
-    pessoa_um = serializers.PrimaryKeyRelatedField(queryset=Pessoa.objects.all())
-    pessoa_dois = serializers.PrimaryKeyRelatedField(queryset=Pessoa.objects.all(), allow_null=True)
+class UnionSerializer(serializers.ModelSerializer):
+
+    # person_one = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all())
+    # person_two = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all(), allow_null=True)
+
+    person_one = PersonSerializer()
+    person_two = PersonSerializer(allow_null=True)
 
     class Meta:
-        model = Uniao
+        model = Union
         fields = [
             'id',
-            'pessoa_um',
-            'pessoa_dois', 
-            'data_inicio', 
-            'data_final'
+            'person_one',
+            'person_two',
         ]
 
-class UniaoSerializerList(serializers.ModelSerializer):
+    # def create(self, validated_data):
+    #     person_one = validated_data['person_one']
+    #     person_two = validated_data['person_two']
+    #     Person(name=person_one)
+    #     Person(name=person_two)
+    #
+    #     union = Union(person_one=person_one, person_two=person_two)
+    #     union.save()
+    #
+    #     return validated_data
 
-    pessoa_um = PessoaSerializer()
-    pessoa_dois = PessoaSerializer(allow_null=True)
+
+class UnionSerializerList(serializers.ModelSerializer):
+    person_one = PersonSerializer()
+    person_two = PersonSerializer(allow_null=True)
 
     class Meta:
-        model = Uniao
+        model = Union
         fields = [
             'id',
-            'pessoa_um',
-            'pessoa_dois', 
-            'data_inicio', 
-            'data_final'
+            'person_one',
+            'person_two',
         ]
 
 
+class FamilySerializer(serializers.ModelSerializer):
 
-class FamiliaSerializer(serializers.ModelSerializer):
-    uniao = serializers.PrimaryKeyRelatedField(queryset=Uniao.objects.all())
-    filhos = serializers.PrimaryKeyRelatedField(queryset=Pessoa.objects.all(), many=True)
+    # union = serializers.PrimaryKeyRelatedField(queryset=Union.objects.all())
+    # children = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all(), many=True)
+
+    union = UnionSerializerList()
+    children = PersonSerializer(many=True)
 
     class Meta:
-        model = Familia
+        model = Family
         fields = [
             'id',
-            'uniao',
-            'filhos'
+            'union',
+            'children'
             ]
 
 
-
-class FamiliaSerializerList(serializers.ModelSerializer):
-    uniao = UniaoSerializerList()
-    filhos = PessoaSerializer(many=True)
+class FamilySerializerList(serializers.ModelSerializer):
+    union = UnionSerializerList()
+    children = PersonSerializer(many=True)
 
     class Meta:
-        model = Familia
+        model = Family
         fields = [
             'id',
-            'uniao',
-            'filhos'
+            'union',
+            'children'
             ]
+
+    # def create(self, validated_data):
+    #
+    #     union = validated_data.pop('union')
+    #     children = validated_data.pop('children')
+    #     id = Family.objects.create(**validated_data)
+    #
+    #     Person.objects.create(**union['person_one'])
+    #     Person.objects.create(**union['person_two'])
+    #
+    #     for child in children:
+    #         Person.objects.create(**child)
+    #
+    #     return id
+

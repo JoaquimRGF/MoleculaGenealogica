@@ -1,35 +1,35 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .models import Pessoa, Uniao, Familia
-from .serializers import PessoaSerializer, UniaoSerializer, UniaoSerializerList, FamiliaSerializer, FamiliaSerializerList
+from .models import Person, Union, Family
+from .serializers import PersonSerializer, UnionSerializer, UnionSerializerList, FamilySerializer, FamilySerializerList
 
 # Create your views here.
-class PessoaView(viewsets.ModelViewSet):
-    queryset = Pessoa.objects.all()
-    serializer_class = PessoaSerializer
 
 
+class PersonView(viewsets.ModelViewSet):
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer
 
 
-class UniaoView(viewsets.ModelViewSet):
-    queryset = Uniao.objects.all()
-    # serializer_class = UniaoSerializer
+class UnionView(viewsets.ModelViewSet):
+    queryset = Union.objects.all()
+    serializer_class = UnionSerializer
 
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return UniaoSerializerList
-        if self.action == 'retrieve':
-            return UniaoSerializerList
-        return UniaoSerializer # default for create/destroy/update.
+    # def get_serializer_class(self):
+    #     if self.action == 'list':
+    #         return UnionSerializerList
+    #     if self.action == 'retrieve':
+    #         return UnionSerializerList
+    #     return UnionSerializer  # default for create/destroy/update.
 
 
-class FamiliaView(viewsets.ModelViewSet):
-    queryset = Familia.objects.all()
-    # serializer_class = FamiliaSerializer
+class FamilyView(viewsets.ModelViewSet):
+    queryset = Family.objects.all()
+    serializer_class = FamilySerializer
 
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return FamiliaSerializerList
-        if self.action == 'retrieve':
-            return FamiliaSerializerList
-        return FamiliaSerializer # default for create/destroy/update.
+    # def get_serializer_class(self):
+    #     if self.action == 'list':
+    #         return FamilySerializerList
+    #     if self.action == 'retrieve':
+    #         return FamilySerializerList
+    #     return FamilySerializer # default for create/destroy/update.

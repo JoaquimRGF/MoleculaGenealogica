@@ -1,34 +1,41 @@
 from django.db import models
-from django.utils import timezone
 
 # Create your models here.
-class Pessoa(models.Model):
-    name = models.CharField(max_length=100)
-    data_criacao = models.DateTimeField( auto_now_add=True)
-    data_modificacao = models.DateTimeField( auto_now=True)
+
+
+class Person(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    create_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
 
-class Uniao(models.Model):
-    pessoa_um = models.ForeignKey(Pessoa, on_delete=models.CASCADE, related_name='pessoa_um_de')
-    pessoa_dois = models.ForeignKey(Pessoa, on_delete=models.CASCADE, related_name='pessoa_dois_de', blank = True, null = True)
-    data_criacao = models.DateTimeField( auto_now_add=True)
-    data_modificacao = models.DateTimeField( auto_now=True)
-    data_inicio = models.DateField(default="1900-01-01")
-    data_final = models.DateField(default="2900-01-01")
+
+class Union(models.Model):
+    person_one = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='person_one_related')
+    person_two = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='person_two_related',
+                                   blank=True, null=True)
+
+    create_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return '{} + {}'.format(self.pessoa_um, self.pessoa_dois)
+        return '{} and {}'.format(self.person_one, self.person_two)
 
-class Familia(models.Model):
-    uniao = models.ForeignKey(Uniao, on_delete=models.CASCADE)
-    filhos = models.ManyToManyField(Pessoa)
-    data_criacao = models.DateTimeField( auto_now_add=True)
-    data_modificacao = models.DateTimeField( auto_now=True)
+
+class Family(models.Model):
+    union = models.ForeignKey(Union, on_delete=models.CASCADE)
+    children = models.ManyToManyField(Person)
+
+    create_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return '{} --> {}'.format(self.uniao, self.filhos)
+        return '{} --> {}'.format(self.union, self.children)
 
 
 

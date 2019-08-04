@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import Pessoa, Uniao, Familia
+from .models import Person, Union, Family
 # Register your models here.
 
-admin.site.register(Pessoa)
-admin.site.register(Uniao)
-admin.site.register(Familia)
+admin.site.register(Person)
+admin.site.register(Union)
+admin.site.register(Family)
