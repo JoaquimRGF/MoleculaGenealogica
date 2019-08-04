@@ -14,9 +14,6 @@ class PersonSerializer(serializers.ModelSerializer):
 
 class UnionSerializer(serializers.ModelSerializer):
 
-    # person_one = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all())
-    # person_two = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all(), allow_null=True)
-
     person_one = PersonSerializer()
     person_two = PersonSerializer(allow_null=True)
 
@@ -40,28 +37,9 @@ class UnionSerializer(serializers.ModelSerializer):
         return union
 
 
-class UnionSerializerList(serializers.ModelSerializer):
-
-    id = serializers.IntegerField(required=False)
-
-    person_one = PersonSerializer()
-    person_two = PersonSerializer(allow_null=True)
-
-    class Meta:
-        model = Union
-        fields = [
-            'id',
-            'person_one',
-            'person_two',
-        ]
-
-
 class FamilySerializer(serializers.ModelSerializer):
 
-    # union = serializers.PrimaryKeyRelatedField(queryset=Union.objects.all())
-    # children = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all(), many=True)
-
-    union = UnionSerializerList()
+    union = UnionSerializer()
     children = PersonSerializer(many=True)
 
     class Meta:
@@ -72,30 +50,24 @@ class FamilySerializer(serializers.ModelSerializer):
             'children'
             ]
 
+    def create(self, validated_data):
 
-class FamilySerializerList(serializers.ModelSerializer):
-    union = UnionSerializerList()
-    children = PersonSerializer(many=True)
+        union = validated_data['union']
+        children = validated_data['children']
 
-    class Meta:
-        model = Family
-        fields = [
-            'id',
-            'union',
-            'children'
-            ]
+        person_one_obj = Person.objects.create(**union['person_one'])
+        person_two_obj = Person.objects.create(**union['person_two'])
 
-    # def create(self, validated_data):
-    #
-    #     union = validated_data.pop('union')
-    #     children = validated_data.pop('children')
-    #     id = Family.objects.create(**validated_data)
-    #
-    #     Person.objects.create(**union['person_one'])
-    #     Person.objects.create(**union['person_two'])
-    #
-    #     for child in children:
-    #         Person.objects.create(**child)
-    #
-    #     return id
+        union = Union.objects.create(person_one=person_one_obj, person_two=person_two_obj)
+
+        family = Family(union=union)
+        family.save()
+
+        for child in children:
+            obj = Person.objects.create(**child)
+            family.children.add(obj)
+
+        return family
+
+
 
