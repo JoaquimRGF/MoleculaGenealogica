@@ -28,19 +28,22 @@ class UnionSerializer(serializers.ModelSerializer):
             'person_two',
         ]
 
-    # def create(self, validated_data):
-    #     person_one = validated_data['person_one']
-    #     person_two = validated_data['person_two']
-    #     Person(name=person_one)
-    #     Person(name=person_two)
-    #
-    #     union = Union(person_one=person_one, person_two=person_two)
-    #     union.save()
-    #
-    #     return validated_data
+    def create(self, validated_data):
+        person_one = validated_data['person_one']
+        person_one_obj = Person.objects.create(**person_one)
+
+        person_two = validated_data['person_two']
+        person_two_obj = Person.objects.create(**person_two)
+
+        union = Union.objects.create(person_one=person_one_obj, person_two=person_two_obj)
+
+        return union
 
 
 class UnionSerializerList(serializers.ModelSerializer):
+
+    id = serializers.IntegerField(required=False)
+
     person_one = PersonSerializer()
     person_two = PersonSerializer(allow_null=True)
 
