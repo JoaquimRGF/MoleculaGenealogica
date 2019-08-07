@@ -10,6 +10,9 @@ class PersonSerializer(serializers.ModelSerializer):
             'id',
             'name'
             ]
+        extra_kwargs = {
+            'name': {'validators': []},
+        }
 
 
 class UnionSerializer(serializers.ModelSerializer):
@@ -26,15 +29,16 @@ class UnionSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+
         person_one = validated_data['person_one']
-        person_one_obj = Person.objects.create(**person_one)
+        person_one_obj = Person.objects.get_or_create(**person_one)
 
         person_two = validated_data['person_two']
-        person_two_obj = Person.objects.create(**person_two)
+        person_two_obj = Person.objects.get_or_create(**person_two)
 
-        union = Union.objects.create(person_one=person_one_obj, person_two=person_two_obj)
+        union = Union.objects.get_or_create(person_one=person_one_obj[0], person_two=person_two_obj[0])
 
-        return union
+        return union[0]
 
 
 class FamilySerializer(serializers.ModelSerializer):
@@ -55,17 +59,17 @@ class FamilySerializer(serializers.ModelSerializer):
         union = validated_data['union']
         children = validated_data['children']
 
-        person_one_obj = Person.objects.create(**union['person_one'])
-        person_two_obj = Person.objects.create(**union['person_two'])
+        person_one_obj = Person.objects.get_or_create(**union['person_one'])
+        person_two_obj = Person.objects.get_or_create(**union['person_two'])
 
-        union = Union.objects.create(person_one=person_one_obj, person_two=person_two_obj)
+        union = Union.objects.get_or_create(person_one=person_one_obj[0], person_two=person_two_obj[0])
 
-        family = Family(union=union)
+        family = Family(union=union[0])
         family.save()
 
         for child in children:
-            obj = Person.objects.create(**child)
-            family.children.add(obj)
+            obj = Person.objects.get_or_create(**child)
+            family.children.add(obj[0])
 
         return family
 
