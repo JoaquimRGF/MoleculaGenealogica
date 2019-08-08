@@ -72,6 +72,3 @@ class FamilySerializer(serializers.ModelSerializer):
             family.children.add(obj[0])
 
         return family
-
-
-

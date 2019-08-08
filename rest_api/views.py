@@ -1,7 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, HttpResponse
 from rest_framework import viewsets
 from .models import Person, Union, Family
 from .serializers import PersonSerializer, UnionSerializer, FamilySerializer
+
+from django.views import View
 
 # Create your views here.
 
@@ -21,3 +23,7 @@ class FamilyView(viewsets.ModelViewSet):
     serializer_class = FamilySerializer
 
 
+class Molecule(View):
+
+    def get(self, request, *args, **kwargs):
+        return HttpResponse(render(request, "rest_api/index.html"))
