@@ -72,3 +72,38 @@ class FamilySerializer(serializers.ModelSerializer):
             family.children.add(obj[0])
 
         return family
+
+
+class LinksSerializer(serializers.ModelSerializer):
+
+    data = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Family
+        fields = [
+            'data',
+        ]
+
+    def get_data(self, obj):
+
+        data = []
+
+        data.append({
+            "source": obj.union.person_one.id,
+            "target": obj.union.person_two.id,
+            "strength": 1
+        })
+
+        for chil in obj.children.all():
+            data.append({
+                "source": obj.union.person_one.id,
+                "target": chil.id,
+                "strength": 1
+            })
+            data.append({
+                "source": obj.union.person_two.id,
+                "target": chil.id,
+                "strength": 1
+            })
+
+        return data

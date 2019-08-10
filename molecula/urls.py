@@ -15,10 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_api.views import Molecule
+from rest_api.views import Molecula
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('rest_api.urls')),
-    path('', Molecule.as_view())
+    path('', Molecula.as_view())
 ]

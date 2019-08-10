@@ -1,7 +1,7 @@
 from django.shortcuts import render, HttpResponse
 from rest_framework import viewsets
 from .models import Person, Union, Family
-from .serializers import PersonSerializer, UnionSerializer, FamilySerializer
+from .serializers import PersonSerializer, UnionSerializer, FamilySerializer, LinksSerializer
 
 from django.views import View
 
@@ -23,7 +23,12 @@ class FamilyView(viewsets.ModelViewSet):
     serializer_class = FamilySerializer
 
 
-class Molecule(View):
+class LinksView(viewsets.ModelViewSet):
+    queryset = Family.objects.all()
+    serializer_class = LinksSerializer
+
+
+class Molecula(View):
 
     def get(self, request, *args, **kwargs):
         return HttpResponse(render(request, "rest_api/index.html"))
