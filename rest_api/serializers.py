@@ -88,22 +88,30 @@ class LinksSerializer(serializers.ModelSerializer):
 
         data = []
 
-        data.append({
-            "source": obj.union.person_one.id,
-            "target": obj.union.person_two.id,
-            "strength": 1
-        })
-
-        for chil in obj.children.all():
+        if obj.union.person_two is not None:
             data.append({
                 "source": obj.union.person_one.id,
-                "target": chil.id,
-                "strength": 0.5
-            })
-            data.append({
-                "source": obj.union.person_two.id,
-                "target": chil.id,
-                "strength": 0.5
+                "target": obj.union.person_two.id,
+                "strength": 1
             })
 
+            for chil in obj.children.all():
+                data.append({
+                    "source": obj.union.person_one.id,
+                    "target": chil.id,
+                    "strength": 0.5
+                })
+                data.append({
+                    "source": obj.union.person_two.id,
+                    "target": chil.id,
+                    "strength": 0.5
+                })
+
+        else:
+            for chil in obj.children.all():
+                data.append({
+                    "source": obj.union.person_one.id,
+                    "target": chil.id,
+                    "strength": 0.5
+                })
         return data
