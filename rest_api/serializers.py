@@ -92,6 +92,7 @@ class LinksSerializer(serializers.ModelSerializer):
             data.append({
                 "source": obj.union.person_one.id,
                 "target": obj.union.person_two.id,
+                "type": "union",
                 "strength": 1
             })
 
@@ -99,11 +100,13 @@ class LinksSerializer(serializers.ModelSerializer):
                 data.append({
                     "source": obj.union.person_one.id,
                     "target": chil.id,
+                    "type": "children",
                     "strength": 0.5
                 })
                 data.append({
                     "source": obj.union.person_two.id,
                     "target": chil.id,
+                    "type": "children",
                     "strength": 0.5
                 })
 
@@ -112,6 +115,7 @@ class LinksSerializer(serializers.ModelSerializer):
                 data.append({
                     "source": obj.union.person_one.id,
                     "target": chil.id,
+                    "type": "children",
                     "strength": 0.5
                 })
         return data
