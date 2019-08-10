@@ -98,12 +98,12 @@ class LinksSerializer(serializers.ModelSerializer):
             data.append({
                 "source": obj.union.person_one.id,
                 "target": chil.id,
-                "strength": 1
+                "strength": 0.5
             })
             data.append({
                 "source": obj.union.person_two.id,
                 "target": chil.id,
-                "strength": 1
+                "strength": 0.5
             })
 
         return data
