@@ -35,7 +35,7 @@ class Family(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return '{} --> {}'.format(self.union, self.children)
+        return '{} --> {}'.format(self.union, tuple(i.name for i in self.children.all()))
 
 
 
