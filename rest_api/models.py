@@ -29,7 +29,7 @@ class Union(models.Model):
 
 class Family(models.Model):
     union = models.ForeignKey(Union, on_delete=models.CASCADE)
-    children = models.ManyToManyField(Person)
+    children = models.ManyToManyField(Person, blank=True)
 
     create_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
