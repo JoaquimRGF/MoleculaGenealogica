@@ -73,7 +73,7 @@ $.getJSON( "http://127.0.0.1:8000/api/links/?format=json", function(json) {
 
 var links = [];
 {for (i = 0; i < json.length; i++) {
- {for (j = 0; j < json[0].data.length; j++) {
+ {for (j = 0; j < json[i].data.length; j++) {
     links.push(json[i].data[j])}};
 }};
 
