@@ -105,6 +105,32 @@ class FamilySerializer(serializers.ModelSerializer):
 
         return family
 
+    def update(self, instance, validated_data):
+
+        union = validated_data['union']
+        children = validated_data['children']
+
+        person_one_obj = Person.objects.get_or_create(**union['person_one'])
+
+        if union['person_two']['name'] != "":
+            person_two_obj = Person.objects.get_or_create(**union['person_two'])
+            union = Union.objects.get_or_create(person_one=person_one_obj[0], person_two=person_two_obj[0])
+            instance.union = union[0]
+        else:
+            union = Union.objects.get_or_create(person_one=person_one_obj[0], person_two=None)
+            instance.union = union[0]
+
+        test = []
+        for child in children:
+            obj = Person.objects.get_or_create(**child)
+            test.append(obj[0])
+
+        instance.children.set(test)
+
+        instance.save()
+
+        return instance
+
 
 class LinksSerializer(serializers.ModelSerializer):
 
