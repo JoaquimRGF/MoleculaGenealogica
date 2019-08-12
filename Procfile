@@ -1,1 +1,1 @@
-web: gunicorn molecula.wsgi --log-file -
+web: gunicorn molecula.wsgi
