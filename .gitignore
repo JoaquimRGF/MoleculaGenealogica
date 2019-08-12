@@ -5,4 +5,4 @@ venv/
 .idea
 .gitignore
 *.pyc
-molecula/settings_copy.py
+molecula/settings.py
