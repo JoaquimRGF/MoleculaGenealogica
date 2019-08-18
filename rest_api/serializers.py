@@ -30,15 +30,6 @@ class UnionSerializer(serializers.ModelSerializer):
             'person_two',
         ]
 
-    # def validate(self, data):
-    #     person_one = data.get("person_one", "")
-    #
-    #     if person_one['name'] == "":
-    #         msg = "person_one name cannot be null"
-    #         raise exceptions.ValidationError(msg)
-    #
-    #     return data
-
     def create(self, validated_data):
 
         person_one = validated_data['person_one']
@@ -112,7 +103,7 @@ class FamilySerializer(serializers.ModelSerializer):
 
         person_one_obj = Person.objects.get_or_create(**union['person_one'])
 
-        if union['person_two']['name'] is not None:
+        if union['person_two'] is not None:
             person_two_obj = Person.objects.get_or_create(**union['person_two'])
             union = Union.objects.get_or_create(person_one=person_one_obj[0], person_two=person_two_obj[0])
             instance.union = union[0]
