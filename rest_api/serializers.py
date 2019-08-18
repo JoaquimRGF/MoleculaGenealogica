@@ -30,14 +30,14 @@ class UnionSerializer(serializers.ModelSerializer):
             'person_two',
         ]
 
-    def validate(self, data):
-        person_one = data.get("person_one", "")
-
-        if person_one['name'] == "":
-            msg = "person_one name cannot be null"
-            raise exceptions.ValidationError(msg)
-
-        return data
+    # def validate(self, data):
+    #     person_one = data.get("person_one", "")
+    #
+    #     if person_one['name'] == "":
+    #         msg = "person_one name cannot be null"
+    #         raise exceptions.ValidationError(msg)
+    #
+    #     return data
 
     def create(self, validated_data):
 
@@ -45,7 +45,7 @@ class UnionSerializer(serializers.ModelSerializer):
         person_one_obj = Person.objects.get_or_create(**person_one)
 
         person_two = validated_data['person_two']
-        if person_two["name"] != "":
+        if person_two is not None:
             person_two_obj = Person.objects.get_or_create(**person_two)
             union = Union.objects.get_or_create(person_one=person_one_obj[0], person_two=person_two_obj[0])
         else:
@@ -62,7 +62,7 @@ class UnionSerializer(serializers.ModelSerializer):
 
         person_two = validated_data.pop('person_two')
 
-        if person_two['name'] != "":
+        if person_two is not None:
             person_two_obj = Person.objects.get_or_create(**person_two)
             instance.person_one = person_two_obj[0]
 
@@ -90,7 +90,7 @@ class FamilySerializer(serializers.ModelSerializer):
 
         person_one_obj = Person.objects.get_or_create(**union['person_one'])
 
-        if union['person_two']['name'] != "":
+        if union['person_two'] is not None:
             person_two_obj = Person.objects.get_or_create(**union['person_two'])
             union = Union.objects.get_or_create(person_one=person_one_obj[0], person_two=person_two_obj[0])
         else:
@@ -112,7 +112,7 @@ class FamilySerializer(serializers.ModelSerializer):
 
         person_one_obj = Person.objects.get_or_create(**union['person_one'])
 
-        if union['person_two']['name'] != "":
+        if union['person_two']['name'] is not None:
             person_two_obj = Person.objects.get_or_create(**union['person_two'])
             union = Union.objects.get_or_create(person_one=person_one_obj[0], person_two=person_two_obj[0])
             instance.union = union[0]
@@ -176,4 +176,5 @@ class LinksSerializer(serializers.ModelSerializer):
                     "type": "children",
                     "strength": 0.2
                 })
+
         return data
