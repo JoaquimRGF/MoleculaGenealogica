@@ -1,0 +1,7 @@
+body {
+  margin: 0; 
+  overflow: hidden; 
+  background-color: rgba(30, 90, 198, .2);
+  /* background-image: url('/static/images/logo.png');
+  background-repeat: no-repeat; */
+}

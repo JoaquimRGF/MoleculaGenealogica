@@ -200,7 +200,12 @@ class LinksSerializer(serializers.ModelSerializer):
             "source": obj.union.all()[0].id,
             "target": obj.union.all()[1].id,
             "type": "union",
-            "strength": 1
+        })
+
+        data.append({
+            "source": obj.union.all()[1].id,
+            "target": obj.union.all()[0].id,
+            "type": "union",
         })
 
         for child in obj.children.all():
@@ -208,13 +213,11 @@ class LinksSerializer(serializers.ModelSerializer):
                         "source": obj.union.all()[0].id,
                         "target": child.id,
                         "type": "children",
-                        "strength": 0.2
                         })
             data.append({
                         "source": obj.union.all()[1].id,
                         "target": child.id,
                         "type": "children",
-                        "strength": 0.2
                         })
         
         return data
