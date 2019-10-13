@@ -10,7 +10,6 @@
     var nodes_total = [];
     var links_total = [];
 
-
     d3.json("http://127.0.0.1:8000/api/person/?format=json").then(function(json) {
     nodes_total = json;
 
@@ -23,19 +22,12 @@
 
     // Definition of body and svg
     // Definition of zoom and remove double click to zoom
-    var vis1 = d3.select("body").append("svg:svg").attr("width", w).attr("height", h).call(d3.zoom().on("zoom", function () {
-      vis.attr("transform", d3.event.transform);
-    }
-    )).on("dblclick.zoom", null);
+    var vis1 = d3.select("body").append("svg:svg").attr("width", w).attr("height", h).call(d3.zoom()
+    .scaleExtent([.1, 4])
+    .on("zoom", function () {vis.attr("transform", d3.event.transform);}))
+    .on("dblclick.zoom", null);
 
     var vis = vis1.append("g");
-
-
-    // Initialization of variables
-    var nodes = [];
-    var nodeElements;
-    var links = [];
-
 
     var selected = null;
 
@@ -93,7 +85,6 @@
 
     var labelNode = vis.append("g").attr("class", "labelNodes")
       .selectAll("text")
-
 
     // Function that produces the svg per se-
     update()
@@ -180,7 +171,6 @@
       labelLayout.force("link", d3.forceLink(label.links).distance(10).strength(2));
       labelLayout.on("tick", ticked)
       labelLayout.restart();
-
     }
 
     // Function that defines the location of each element in the SVG
