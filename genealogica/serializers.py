@@ -35,15 +35,15 @@ class FamilySerializer(serializers.ModelSerializer):
             if 'id' in union.keys():
                 union_id.append(union['id'])
             if len(union_id) != len(set(union_id)):
-                raise serializers.ValidationError('You have duplicate union')
+                raise serializers.ValidationError('You have duplicate persons in union')
         children_id = []
         for children in attrs['children']:
             if 'id' in children.keys():
                 children_id.append(children['id'])
             if len(children_id) != len(set(children_id)):
-                raise serializers.ValidationError('You have duplicate children')
+                raise serializers.ValidationError('You have duplicate persons in childrens')
         if len(union_id + children_id) != len(set(union_id + children_id)):
-            raise serializers.ValidationError('You have duplicate union and children')
+            raise serializers.ValidationError('You have duplicate persons in union and children')
 
         return attrs
 
@@ -85,6 +85,22 @@ class FamilySerializer(serializers.ModelSerializer):
                         if value[0]['id'] in union_id and value[1]['id'] in union_id:
                             raise serializers.ValidationError('This union already exist in family id: {}'.format(family.id))
 
+        """
+        Avoid union between parents and self-childrens
+        """
+
+        if len(value) == 2:
+            if 'id' in value[0] and 'id' in value[1]:
+                for family in qs:
+                    for person in family.union.all():
+                            if value[0]['id'] == person.id:
+                                for child in family.children.all():
+                                    if value[1]['id'] == child.id:
+                                        raise serializers.ValidationError('Parents cannot union with self-childrens. Family id: {}'.format(family.id))
+                            if value[1]['id'] == person.id:
+                                for child in family.children.all():
+                                    if value[0]['id'] == child.id:
+                                        raise serializers.ValidationError('Parents cannot union with self-childrens. Family id: {}'.format(family.id))
         return value
 
     def validate_children(self, value):
