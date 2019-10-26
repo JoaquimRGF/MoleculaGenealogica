@@ -34,13 +34,14 @@ button:focus {
 }
 
 
-.reshufle-node {
+.reshufle {
   position: absolute;
   top: 6%;
   right: 3%;
 }
 
-.reshufle-node button{
+.reshufle button{
+  margin-top: 10px;
   background: none;
   padding: 3%;
   width: 5.5em;
