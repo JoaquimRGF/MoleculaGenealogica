@@ -10,6 +10,7 @@ class PersonSerializer(serializers.ModelSerializer):
         model = Person
         fields = [
             'id',
+            'id_yaml',
             'name'
             ]
 
@@ -139,26 +140,57 @@ class FamilySerializer(serializers.ModelSerializer):
         """
 
         union_data = validated_data.pop('union')
-        children_data = validated_data.pop('children')
+
 
         family = Family()
         family.save()
 
-        for uni in union_data:
-            if 'id' in uni.keys():
-                obj = Person.objects.get(id=uni["id"])
-                family.union.add(obj)
-            else:
-                obj = Person.objects.create(**uni)
-                family.union.add(obj)
+        for person in union_data:
+            if 'id' in person.keys():
+                try:
+                    obj = Person.objects.get(id=person["id"])
+                    family.union.add(obj)
+                except:
+                    new_obj = Person.objects.create(**person)
+                    family.union.add(new_obj)
 
-        for child in children_data:
-            if 'id' in child.keys():
-                obj = Person.objects.get(id=child["id"])
-                family.children.add(obj)
+            elif 'id_yaml' in person.keys():
+                try:
+                    obj = Person.objects.get(id_yaml=person["id_yaml"])
+                    family.union.add(obj)
+                except Person.DoesNotExist:
+                    new_obj = Person.objects.create(**person)
+                    family.union.add(new_obj)
+
             else:
-                obj = Person.objects.create(**child)
-                family.children.add(obj)
+                obj = Person.objects.create(**person)
+                family.union.add(obj)
+            try:
+                children_data = validated_data.pop('children')
+
+                for child in children_data:
+
+                    if 'id' in child.keys():
+                        try:
+                            obj = Person.objects.get(id=child["id"])
+                            family.children.add(obj)
+                        except:
+                            new_obj = Person.objects.create(**child)
+                            family.children.add(new_obj)
+
+                    elif 'id_yaml' in child.keys():
+                        try:
+                            obj = Person.objects.get(id_yaml=child["id_yaml"])
+                            family.children.add(obj)
+                        except Person.DoesNotExist:
+                            new_obj = Person.objects.create(**child)
+                            family.children.add(new_obj)
+
+                    else:
+                        obj = Person.objects.create(**child)
+                        family.children.add(obj)
+            except:
+                continue
 
         return family
 
