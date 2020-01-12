@@ -183,15 +183,32 @@
       // Define location of Label Nodes 
       labelLayout.alphaTarget(0.3).restart();
       labelNode.each(function (d, i) {
+        // 
         if (i % 2 == 0) {
           // If node on the left of the screen push the label to the left of the node
           if (d.node.x < w / 2) {
-            d.x = d.node.x - Math.min(d.node.name.length * 11 * (w / 2 - d.node.x) / (w / 2), d.node.name.length * 5)
-          } else {
-            d.x = d.node.x + Math.min(d.node.name.length * 7 * (w / 2 - d.node.x) / (w / 2), d.node.name.length * 5);
-          }
+            // d.x = d.node.x - Math.min(d.node.name.length * 7 * (w / 2 - d.node.x) / (w / 2), d.node.name.length * 5);
+            //d.x = 0;
+            d.x = d.node.x - (35 - 100 * (w / 2 - d.node.x - d.node.name.length * 5) / (w / 2)) - d.node.name.length * 5;
 
-          d.y = d.node.y;
+          // right
+          } else if ((d.node.x - w / 2) / (w / 2) > 0.2) { 
+            //d.x = d.node.x + Math.log10((d.node.x - w / 2) / (w / 2)) * 10 * 7;
+            d.x = d.node.x + 40 - (d.node.x - w / 2) / (w / 2) * 95;
+            //d.x = w;
+
+          // // center
+          } else {
+            d.x = d.node.x + 25 + (d.node.x - w / 2) / (w / 2) * 2;
+            // d.x = d.node.x + Math.min(d.node.name.length * 11 * (w / 2 - d.node.x) / (w / 2), d.node.name.length * 5);
+            // d.x = d.node.x
+
+            //d.x = w;
+          }
+          // d.y = d.node.y;
+          d.y = d.node.y - (d.node.y - h / 2) / (h / 2) * 20;
+
+        // if (i % 2 !== 0) 
         } else {
           var b = this.getBBox();
 
