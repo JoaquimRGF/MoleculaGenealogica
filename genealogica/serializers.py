@@ -10,6 +10,7 @@ class PersonSerializer(serializers.ModelSerializer):
         model = Person
         fields = [
             'id',
+            'id_yaml',
             'name'
             ]
 
@@ -35,15 +36,15 @@ class FamilySerializer(serializers.ModelSerializer):
             if 'id' in union.keys():
                 union_id.append(union['id'])
             if len(union_id) != len(set(union_id)):
-                raise serializers.ValidationError('You have duplicate union')
+                raise serializers.ValidationError('You have duplicate persons in union')
         children_id = []
         for children in attrs['children']:
             if 'id' in children.keys():
                 children_id.append(children['id'])
             if len(children_id) != len(set(children_id)):
-                raise serializers.ValidationError('You have duplicate children')
+                raise serializers.ValidationError('You have duplicate persons in childrens')
         if len(union_id + children_id) != len(set(union_id + children_id)):
-            raise serializers.ValidationError('You have duplicate union and children')
+            raise serializers.ValidationError('You have duplicate persons in union and children')
 
         return attrs
 
@@ -85,6 +86,22 @@ class FamilySerializer(serializers.ModelSerializer):
                         if value[0]['id'] in union_id and value[1]['id'] in union_id:
                             raise serializers.ValidationError('This union already exist in family id: {}'.format(family.id))
 
+        """
+        Avoid union between parents and self-childrens
+        """
+
+        if len(value) == 2:
+            if 'id' in value[0] and 'id' in value[1]:
+                for family in qs:
+                    for person in family.union.all():
+                            if value[0]['id'] == person.id:
+                                for child in family.children.all():
+                                    if value[1]['id'] == child.id:
+                                        raise serializers.ValidationError('Parents cannot union with self-childrens. Family id: {}'.format(family.id))
+                            if value[1]['id'] == person.id:
+                                for child in family.children.all():
+                                    if value[0]['id'] == child.id:
+                                        raise serializers.ValidationError('Parents cannot union with self-childrens. Family id: {}'.format(family.id))
         return value
 
     def validate_children(self, value):
@@ -123,28 +140,63 @@ class FamilySerializer(serializers.ModelSerializer):
         """
 
         union_data = validated_data.pop('union')
-        children_data = validated_data.pop('children')
 
-        family = Family()
-        family.save()
+        try:
+            Person.objects.get(id_yaml=union_data[0]["id_yaml"])
+            Person.objects.get(id_yaml=union_data[1]["id_yaml"])
+        except:
+            family = Family()
+            family.save()
 
-        for uni in union_data:
-            if 'id' in uni.keys():
-                obj = Person.objects.get(id=uni["id"])
-                family.union.add(obj)
-            else:
-                obj = Person.objects.create(**uni)
-                family.union.add(obj)
+            for person in union_data:
+                if 'id' in person.keys():
+                    try:
+                        obj = Person.objects.get(id=person["id"])
+                        family.union.add(obj)
+                    except:
+                        new_obj = Person.objects.create(**person)
+                        family.union.add(new_obj)
 
-        for child in children_data:
-            if 'id' in child.keys():
-                obj = Person.objects.get(id=child["id"])
-                family.children.add(obj)
-            else:
-                obj = Person.objects.create(**child)
-                family.children.add(obj)
+                elif 'id_yaml' in person.keys():
+                    try:
+                        obj = Person.objects.get(id_yaml=person["id_yaml"])
+                        family.union.add(obj)
+                    except Person.DoesNotExist:
+                        new_obj = Person.objects.create(**person)
+                        family.union.add(new_obj)
 
-        return family
+                else:
+                    obj = Person.objects.create(**person)
+                    family.union.add(obj)
+                try:
+                    children_data = validated_data.pop('children')
+
+                    for child in children_data:
+
+                        if 'id' in child.keys():
+                            try:
+                                obj = Person.objects.get(id=child["id"])
+                                family.children.add(obj)
+                            except:
+                                new_obj = Person.objects.create(**child)
+                                family.children.add(new_obj)
+
+                        elif 'id_yaml' in child.keys():
+                            try:
+                                obj = Person.objects.get(id_yaml=child["id_yaml"])
+                                family.children.add(obj)
+                            except Person.DoesNotExist:
+                                new_obj = Person.objects.create(**child)
+                                family.children.add(new_obj)
+
+                        else:
+                            obj = Person.objects.create(**child)
+                            family.children.add(obj)
+                except:
+                    continue
+
+            return family
+            
 
     def update(self, instance, validated_data):
 

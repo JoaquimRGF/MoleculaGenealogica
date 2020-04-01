@@ -1,35 +1,156 @@
-    // A practical solution (covering all browsers):
-    var w = window.innerWidth
-    || document.documentElement.clientWidth
-    || document.body.clientWidth;
+<html lang="en">
 
-    var h = window.innerHeight
-    || document.documentElement.clientHeight
-    || document.body.clientHeight;
+<head>
+  <meta charset="utf-8">
+  <title>Force based label placement</title>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: rgba(30, 90, 198, .2);
+    }
 
-    var nodes_total = [];
-    var links_total = [];
+    .search-node {
+      position: absolute;
+      background: none;
+      top: 3%;
+      right: 3%;
+      border: 1px solid #689ba5;
+      border-radius: 10px;
+      width: 20%;
+    }
 
-    d3.json("http://127.0.0.1:8000/api/person/?format=json").then(function(json) {
-    nodes_total = json;
+    .search-node input {
+      background: none;
+      border: none;
+      padding: 3%;
+      width: 100%;
+      font-family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
+      font-size: 20px;
+      color: rgb(70, 70, 70)
+    }
 
-    d3.json("http://127.0.0.1:8000/api/links/?format=json").then(function(json) {
-      {for (i = 0; i < json.length; i++) {
-      {for (j = 0; j < json[i].data.length; j++) {
-        links_total.push(json[i].data[j])}};
-    }};
+    input:focus,
+    select:focus,
+    textarea:focus,
+    button:focus {
+      outline: none;
+    }
+  </style>
+</head>
 
+<body>
+  <!-- added this to allow search of nodes -->
+  <div class="search-node">
+    <input type="text" id="search-node" placeholder="Who are you looking for?">
+  </div>
+  <script type="text/javascript" charset="utf-8">
+    var w = document.body.clientWidth, h = document.body.clientHeight;
+
+    var labelDistance = 0;
 
     // Definition of body and svg
     // Definition of zoom and remove double click to zoom
-    var vis1 = d3.select("body").append("svg:svg").attr("width", w).attr("height", h).call(d3.zoom()
-    .scaleExtent([.1, 4])
-    .on("zoom", function () {vis.attr("transform", d3.event.transform);}))
-    .on("dblclick.zoom", null);
+    var vis1 = d3.select("body").append("svg:svg").attr("width", w).attr("height", h).call(d3.zoom().on("zoom", function () {
+      vis.attr("transform", d3.event.transform);
+    }
+    )).on("dblclick.zoom", null);
 
     var vis = vis1.append("g");
 
+
+    // Initialization of variables
+    var nodes = [];
+    var nodeElements;
+    var links = [];
+
+
     var selected = null;
+
+
+    
+    var nodes_total = [{ "id": 1, "label": "Ladislau Roque Pinto" }, { "id": 2, "label": "Alzira Maria Neto" }, { "id": 3, "label": "Lurdes Neto Pinto" }, { "id": 4, "label": "Gracinda Neto Pinto" }, { "id": 5, "label": "Lucilia Neto Pinto" }, { "id": 6, "label": "Ana Neto Pinto" }, { "id": 7, "label": "Emilia Neto Pinto" }, { "id": 8, "label": "Fatima Neto Pinto" }, { "id": 9, "label": "Cristina Neto Pinto" }, { "id": 10, "label": "Carla Sofia Neto Pinto" }, { "id": 11, "label": "Augusto Gil" }, { "id": 12, "label": "Pedro Gil" }, { "id": 13, "label": "Cecilia Gil" }, { "id": 14, "label": "Jessica Gil" }, { "id": 15, "label": "Armando Pereira Tomé" }, { "id": 16, "label": "Samuel Neto Pereira" }, { "id": 17, "label": "Marisa Neto Pereira" }, { "id": 18, "label": "Alberto Pires Monteiro" }, { "id": 19, "label": "Dina Pinto Monteiro" }, { "id": 20, "label": "Micael Neto Pires" }, { "id": 21, "label": "Antonio Monteiro" }, { "id": 22, "label": "Viviane Monteiro" }, { "id": 23, "label": "Sara Monteiro" }, { "id": 24, "label": "Jorge Esteves" }, { "id": 25, "label": "Marco Pinto Esteves" }, { "id": 26, "label": "Jorge Gabriel Pinto Esteves" }, { "id": 27, "label": "Carlos Vieira" }, { "id": 28, "label": "Fabio Pinto Vieira" }, { "id": 30, "label": "Pedro Picao" }, { "id": 31, "label": "Tiago Picao" }, { "id": 32, "label": "Martim Picao" }, { "id": 33, "label": "Agostinho Lucas Martins" }, { "id": 34, "label": "Edgar Neto Martins" }, { "id": 35, "label": "Martim Picao" }, { "id": 36, "label": "Bruno Alfaiate" }, { "id": 37, "label": "Sofia Monteiro Alfaiate" }, { "id": 38, "label": "Clara Monteiro Alfaiate" }, { "id": 39, "label": "François" }, { "id": 40, "label": "Julia Gil" }];
+
+    var links_total = [{ "source": 1, "target": 2, "type": "union", "strength": 5, "weight": 0.9 },
+    { "source": 2, "target": 1, "type": "union", "strength": 5, "weight": 0.9 },
+    { "source": 1, "target": 3, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 2, "target": 3, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 1, "target": 4, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 2, "target": 4, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 1, "target": 5, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 2, "target": 5, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 1, "target": 6, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 2, "target": 6, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 1, "target": 7, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 2, "target": 7, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 1, "target": 8, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 2, "target": 8, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 1, "target": 9, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 2, "target": 9, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 1, "target": 10, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 2, "target": 10, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 3, "target": 11, "type": "union", "strength": 5, "weight": 0.9 },
+    { "source": 11, "target": 3, "type": "union", "strength": 5, "weight": 0.9 },
+    { "source": 3, "target": 12, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 11, "target": 12, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 3, "target": 13, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 11, "target": 13, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 3, "target": 14, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 11, "target": 14, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 4, "target": 15, "type": "union", "strength": 5, "weight": 0.9 },
+    { "source": 15, "target": 4, "type": "union", "strength": 5, "weight": 0.9 },
+    { "source": 4, "target": 16, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 15, "target": 16, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 4, "target": 17, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 15, "target": 17, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 5, "target": 18, "type": "union", "strength": 5, "weight": 0.9 },
+    { "source": 18, "target": 5, "type": "union", "strength": 5, "weight": 0.9 },
+    { "source": 5, "target": 19, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 18, "target": 19, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 5, "target": 20, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 18, "target": 20, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 6, "target": 21, "type": "union", "strength": 5, "weight": 0.9 },
+    { "source": 21, "target": 6, "type": "union", "strength": 1, "weight": 0.9 },
+    { "source": 6, "target": 22, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 21, "target": 22, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 6, "target": 23, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 21, "target": 23, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 7, "target": 24, "type": "union", "strength": 1, "weight": 0.9 },
+    { "source": 24, "target": 7, "type": "union", "strength": 1, "weight": 0.9 },
+    { "source": 7, "target": 25, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 24, "target": 25, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 7, "target": 26, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 24, "target": 26, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 8, "target": 27, "type": "union", "strength": 1, "weight": 0.9 },
+    { "source": 27, "target": 8, "type": "union", "strength": 1, "weight": 0.9 },
+    { "source": 8, "target": 28, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 27, "target": 28, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 9, "target": 30, "type": "union", "strength": 1, "weight": 0.9 },
+    { "source": 30, "target": 9, "type": "union", "strength": 1, "weight": 0.9 },
+    { "source": 9, "target": 31, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 30, "target": 31, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 9, "target": 32, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 30, "target": 32, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 10, "target": 33, "type": "union", "strength": 1, "weight": 0.9 },
+    { "source": 33, "target": 10, "type": "union", "strength": 1, "weight": 0.9 },
+    { "source": 10, "target": 34, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 33, "target": 34, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 10, "target": 35, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 33, "target": 35, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 19, "target": 36, "type": "union", "strength": 1, "weight": 0.9 },
+    { "source": 36, "target": 19, "type": "union", "strength": 1, "weight": 0.9 },
+    { "source": 19, "target": 37, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 36, "target": 37, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 19, "target": 38, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 36, "target": 38, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 13, "target": 39, "type": "union", "strength": 1, "weight": 0.9 },
+    { "source": 39, "target": 13, "type": "union", "strength": 1, "weight": 0.9 },
+    { "source": 13, "target": 40, "type": "children", "strength": 0.2, "weight": 0.9 },
+    { "source": 39, "target": 40, "type": "children", "strength": 0.2, "weight": 0.9 }];
+
+
 
     // Credits to https://bl.ocks.org/mapio/53fed7d84cd1812d6a6639ed7aa83868
 
@@ -46,6 +167,7 @@
 
     // adjency lists to help verification of neighbors
     var adjlist = {};
+    var adjlist_node = {};
     for (var i = 0; i < links_total.length; i++) {
       adjlist[nodesbyid[links_total[i].source] + "-" + nodesbyid[links_total[i].target]] = true;
       adjlist[nodesbyid[links_total[i].target] + "-" + nodesbyid[links_total[i].source]] = true;
@@ -53,7 +175,6 @@
       links_total[i]["id"] = i;
       links_total[i].target = nodesbyid[links_total[i].target];
     };
-
 
 
     // Initialization of D3 Force Simulation
@@ -86,6 +207,7 @@
     var labelNode = vis.append("g").attr("class", "labelNodes")
       .selectAll("text")
 
+
     // Function that produces the svg per se-
     update()
 
@@ -107,6 +229,7 @@
           id: i * 2
         });
       });
+
 
       // Remove elements that are eliminated by filter
       linkElements = linkElements.data(links, function (d) { return d.id; });
@@ -149,7 +272,7 @@
       // Insert new elements
       var newlabelNode = labelNode.enter()
         .append("text")
-        .text(function (d, i) { return i % 2 == 0 ? "" : d.node.name; })
+        .text(function (d, i) { return i % 2 == 0 ? "" : d.node.label; })
         .style("fill", "#555")
         .style("font-family", "Arial")
         .style("font-size", 12)
@@ -171,6 +294,7 @@
       labelLayout.force("link", d3.forceLink(label.links).distance(10).strength(2));
       labelLayout.on("tick", ticked)
       labelLayout.restart();
+
     }
 
     // Function that defines the location of each element in the SVG
@@ -183,32 +307,15 @@
       // Define location of Label Nodes 
       labelLayout.alphaTarget(0.3).restart();
       labelNode.each(function (d, i) {
-        // 
         if (i % 2 == 0) {
           // If node on the left of the screen push the label to the left of the node
           if (d.node.x < w / 2) {
-            // d.x = d.node.x - Math.min(d.node.name.length * 7 * (w / 2 - d.node.x) / (w / 2), d.node.name.length * 5);
-            //d.x = 0;
-            d.x = d.node.x - (35 - 100 * (w / 2 - d.node.x - d.node.name.length * 5) / (w / 2)) - d.node.name.length * 5;
-
-          // right
-          } else if ((d.node.x - w / 2) / (w / 2) > 0.2) { 
-            //d.x = d.node.x + Math.log10((d.node.x - w / 2) / (w / 2)) * 10 * 7;
-            d.x = d.node.x + 40 - (d.node.x - w / 2) / (w / 2) * 95;
-            //d.x = w;
-
-          // // center
+            d.x = d.node.x - Math.min(d.node.label.length * 9 * (w / 2 - d.node.x) / (w / 2), d.node.label.length * 5)
           } else {
-            d.x = d.node.x + 25 + (d.node.x - w / 2) / (w / 2) * 2;
-            // d.x = d.node.x + Math.min(d.node.name.length * 11 * (w / 2 - d.node.x) / (w / 2), d.node.name.length * 5);
-            // d.x = d.node.x
-
-            //d.x = w;
+            d.x = d.node.x;
           }
-          // d.y = d.node.y;
-          d.y = d.node.y - (d.node.y - h / 2) / (h / 2) * 20;
 
-        // if (i % 2 !== 0) 
+          d.y = d.node.y;
         } else {
           var b = this.getBBox();
 
@@ -282,7 +389,7 @@
     // Standard colors of links
     function colorstandartlink(link) {
       if (link.type === 'union') {
-        return "#e08080";
+        return "#ba6a6a";
       } else {
         return "rgba(50, 50, 50, 0.2)";
       }
@@ -292,7 +399,7 @@
     function getLinkColor(node, link) {
       if (isNeighborLink(node, link)) {
         if (link.type === 'union') {
-          return "#e08080";
+          return "#ba6a6a";
         }
         else {
           return "#aaba6a"
@@ -335,26 +442,25 @@
       }
     }
 
+
     // Function that retrieves the data from the input text form and applies a automatic filter
     var input = document.querySelector('#search-node');
-    if (input) {
-      input.addEventListener('input', function () {
-        if (input.value === "" || !input.value) {
-          nodes = nodes_total
-          links = links_total
-        } else {
-          // Filter nodes
-          var aux = regex_search(nodes_total, input.value)
-          nodes = aux[0]
-          var nodes_ids = aux[1]
-          // nodes, nodes_ids = regex_search(nodes_total, input.value)
-          // Retrieve links of given nodes
-          links = filter_links_by_nodes(links_total, nodes_ids)
-        }
-        // Update graph
-        update()
-      });
-    }
+    input.addEventListener('input', function () {
+      if (input.value === "" || !input.value) {
+        nodes = nodes_total
+        links = links_total
+      } else {
+        // Filter nodes
+        var aux = regex_search(nodes_total, input.value)
+        nodes = aux[0]
+        var nodes_ids = aux[1]
+        // nodes, nodes_ids = regex_search(nodes_total, input.value)
+        // Retrieve links of given nodes
+        links = filter_links_by_nodes(links_total, nodes_ids)
+      }
+      // Update graph
+      update()
+    });
 
 
     // Regex search through nodes names
@@ -363,7 +469,7 @@
       let new_nodes = []
       let new_nodes_ids = []
       for (var i = 0; i < nodes_list.length; i++) {
-        if (nodes_list[i].name.search(re) > -1) {
+        if (nodes_list[i].label.search(re) > -1) {
           new_nodes.push(nodes_list[i])
           new_nodes_ids.push(nodes_list[i].id)
         }
@@ -474,5 +580,13 @@
         return "translate(" + fixna(d.x) + "," + fixna(d.y) + ")";
       });
     }
-    });
-    });
+
+
+
+
+
+  </script>
+
+</body>
+
+</html>

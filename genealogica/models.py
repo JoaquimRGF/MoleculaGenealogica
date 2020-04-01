@@ -6,6 +6,7 @@ from django.db import models
 
 class Person(models.Model):
     name = models.CharField(max_length=100)
+    id_yaml = models.CharField(max_length=10, blank=True, null=True)
 
     def __str__(self):
         return self.name
